@@ -21,11 +21,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build (must produce dist/index.html)
+      - name: Validate engine manifest exists
+        run: node -e "require('fs').accessSync('engine.manifest.json')"
+
+      - name: Build (must produce required outputs)
         run: npm run build
 
-      - name: Assert build artifact exists
-        run: node -e "require('fs').accessSync('dist/index.html')"
+      - name: Assert build artifacts exist
+        run: node -e "require('fs').accessSync('dist/index.html'); require('fs').accessSync('dist/engine.snapshot.json')"
 
       - name: Engine verification (required / fail-closed)
         run: |

@@ -1,0 +1,20 @@
+{
+  "schema": "beat-mania-engine.engine-manifest.v1",
+  "engineVersion": "0.1.0",
+  "build": {
+    "command": "npm run build",
+    "outputDir": "dist",
+    "requiredOutputs": ["dist/index.html", "dist/engine.snapshot.json"]
+  },
+  "inputs": {
+    "sourceDirs": ["src"],
+    "configFiles": ["package.json", "tsconfig.json"]
+  },
+  "artifacts": {
+    "snapshot": "dist/engine.snapshot.json",
+    "mustMatchSchema": "beat-mania-engine.engine-snapshot.v0"
+  },
+  "policy": {
+    "failOnMissingArtifact": true
+  }
+}
