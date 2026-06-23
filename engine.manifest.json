@@ -12,7 +12,7 @@
   },
   "artifacts": {
     "snapshot": "dist/engine.snapshot.json",
-    "mustMatchSchema": "beat-mania-engine.engine-snapshot.v0"
+    "mustMatchSchema": "beat-mania-engine.engine-snapshot.v1"
   },
   "policy": {
     "failOnMissingArtifact": true
