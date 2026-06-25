@@ -6,10 +6,14 @@ export function stableStringify(value: unknown): string {
     return `[${value.map(stableStringify).join(',')}]`;
   }
   if (value !== null && typeof value === 'object') {
-    const keys = Object.keys(value as Record<string, unknown>).sort();
-    const body = keys
-      .map((k) => `${JSON.stringify(k)}:${stableStringify((value as Record<string, unknown>)[k])}`)
-      .join(',');
+    const obj = value as Record<string, unknown>;
+    // Omit undefined-valued keys so an explicit `field: undefined` hashes
+    // identically to an omitted field, matching JSON.stringify's behavior
+    // and keeping the hash stable across a serialize/deserialize round-trip.
+    const keys = Object.keys(obj)
+      .filter((k) => obj[k] !== undefined)
+      .sort();
+    const body = keys.map((k) => `${JSON.stringify(k)}:${stableStringify(obj[k])}`).join(',');
     return `{${body}}`;
   }
   return JSON.stringify(value);

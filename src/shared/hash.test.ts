@@ -25,6 +25,17 @@ describe('stableStringify', () => {
   it('does not confuse null with non-finite numbers', () => {
     expect(stableStringify(null)).toEqual('null');
   });
+
+  it('treats an explicit undefined field the same as an omitted field', () => {
+    expect(stableStringify({ a: 1, b: undefined })).toEqual(stableStringify({ a: 1 }));
+  });
+
+  it('is stable across a JSON serialize/deserialize round-trip, including explicit-undefined fields', () => {
+    const original = { t: 0, kind: 'meta', metaType: 'start', data: undefined, seq: 0 };
+    const roundTripped = JSON.parse(JSON.stringify(original));
+    expect(stableStringify(roundTripped)).toEqual(stableStringify(original));
+    expect(canonicalHash(roundTripped)).toEqual(canonicalHash(original));
+  });
 });
 
 describe('canonicalHash', () => {
