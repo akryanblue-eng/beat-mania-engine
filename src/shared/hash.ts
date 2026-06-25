@@ -1,4 +1,7 @@
 export function stableStringify(value: unknown): string {
+  if (typeof value === 'number' && !Number.isFinite(value)) {
+    throw new Error(`stableStringify: non-finite number (${value}) cannot be hashed deterministically`);
+  }
   if (Array.isArray(value)) {
     return `[${value.map(stableStringify).join(',')}]`;
   }
