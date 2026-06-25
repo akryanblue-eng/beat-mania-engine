@@ -75,7 +75,7 @@ describe('runKernel', () => {
     expect(trace.outcomes.map((o) => o.type)).toEqual(['MISS', 'HIT', 'MISS']);
   });
 
-  it('produces an identical stateSnapshots array and traceHash on rerun', () => {
+  it('produces an identical stateSnapshots array and traceHash across repeated runs', () => {
     const input: KernelInput = {
       dt: 0.01,
       notes: baseNotes,
@@ -87,10 +87,12 @@ describe('runKernel', () => {
       targetSongT: 1.0,
       hitWindow: 0.03,
     };
-    const traceA = runKernel(input);
-    const traceB = runKernel(input);
-    expect(traceA.stateSnapshots).toEqual(traceB.stateSnapshots);
-    expect(traceA.traceHash).toEqual(traceB.traceHash);
-    expect(traceA.traceHash).toBeTruthy();
+    const traces = Array.from({ length: 10 }, () => runKernel(input));
+    const hashes = new Set(traces.map((t) => t.traceHash));
+    expect(hashes.size).toBe(1);
+    expect(traces[0].traceHash).toBeTruthy();
+    for (const trace of traces.slice(1)) {
+      expect(trace.stateSnapshots).toEqual(traces[0].stateSnapshots);
+    }
   });
 });
