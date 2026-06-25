@@ -21,6 +21,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run ExecutionKernel test suite (required / fail-closed)
+        run: npm test
+
       - name: Validate engine manifest exists
         run: node -e "require('fs').accessSync('engine.manifest.json')"
 

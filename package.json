@@ -5,12 +5,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/generate-snapshot.js && node -e \"require('fs').accessSync('dist/index.html'); require('fs').accessSync('dist/engine.snapshot.json')\"",
+    "build": "vite build && tsx scripts/generate-snapshot.ts && node -e \"require('fs').accessSync('dist/index.html'); require('fs').accessSync('dist/engine.snapshot.json')\"",
     "preview": "vite preview",
+    "test": "vitest run",
     "engine:verify": "node scripts/engine-verify.js"
   },
   "devDependencies": {
+    "@types/node": "^26.0.1",
+    "tsx": "^4.22.4",
     "typescript": "^5.6.0",
-    "vite": "^6.0.0"
+    "vite": "^6.0.0",
+    "vitest": "^4.1.9"
   }
 }
