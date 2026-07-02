@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && tsx scripts/generate-snapshot.ts && node -e \"require('fs').accessSync('dist/index.html'); require('fs').accessSync('dist/engine.snapshot.json')\"",
+    "build": "vite build && tsx scripts/generate-snapshot.ts && node -e \"require('fs').accessSync('dist/index.html'); require('fs').accessSync('dist/play.html'); require('fs').accessSync('dist/engine.snapshot.json')\"",
     "preview": "vite preview",
     "test": "vitest run",
     "engine:verify": "node scripts/engine-verify.js"
