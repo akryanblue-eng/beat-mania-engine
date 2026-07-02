@@ -1,5 +1,6 @@
 import { runKernel } from './executionKernel/runKernel';
 import type { ExecutionTrace, InputEvent, KernelInput, Note } from './executionKernel/types';
+import { canonicalHash } from './shared/hash';
 
 const NOTES: Note[] = [
   { id: 'n0', lane: 0, tOn: 1.0 },
@@ -48,6 +49,19 @@ function updateStatus(): void {
         : 'Done.';
 }
 
+// Breaks a trace into three independently hashable axes so a MISMATCH
+// can be diagnosed (input order changed? timing drifted? judgments flipped?)
+// without guessing which part of the opaque traceHash diverged.
+function traceAxes(trace: ExecutionTrace) {
+  return {
+    inputs: canonicalHash(trace.inputs.map((e) => e.t)),
+    timing: canonicalHash(
+      trace.outcomes.flatMap((o) => (o.type === 'HIT' ? [o.error] : [])),
+    ),
+    judgments: canonicalHash(trace.outcomes.map((o) => o.type)),
+  };
+}
+
 function renderResults(traceA: ExecutionTrace, traceB: ExecutionTrace): void {
   const snap = traceA.stateSnapshots[traceA.stateSnapshots.length - 1];
   const outcomeLines = traceA.outcomes.map((o) =>
@@ -56,6 +70,14 @@ function renderResults(traceA: ExecutionTrace, traceB: ExecutionTrace): void {
       : `  MISS ${o.noteId}`,
   );
   const replayOk = traceA.traceHash === traceB.traceHash;
+
+  const axA = traceAxes(traceA);
+  const axB = traceAxes(traceB);
+  const axLines = (['inputs', 'timing', 'judgments'] as const).map((k) => {
+    const ok = axA[k] === axB[k];
+    return `  ${k.padEnd(9)} ${axA[k]}  ${ok ? '✓' : '✗ replay=' + axB[k]}`;
+  });
+
   outputEl.textContent = [
     `score  ${snap.score.toFixed(2)}`,
     `combo  ${snap.combo}`,
@@ -63,7 +85,9 @@ function renderResults(traceA: ExecutionTrace, traceB: ExecutionTrace): void {
     ...outcomeLines,
     '',
     `hash   ${traceA.traceHash ?? '—'}`,
-    `replay ${replayOk ? 'OK ✓' : 'MISMATCH ✗  ' + (traceB.traceHash ?? '—')}`,
+    `replay ${replayOk ? 'OK ✓' : 'MISMATCH ✗'}`,
+    '',
+    ...axLines,
   ].join('\n');
 }
 
