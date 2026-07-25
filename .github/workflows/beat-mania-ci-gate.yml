@@ -2,6 +2,7 @@ name: Beat Mania CI Gate v1
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, labeled]
   push:
     branches: [main]
 
@@ -37,3 +38,25 @@ jobs:
         run: |
           node -e "const p=require('./package.json'); if(!p.scripts || !p.scripts['engine:verify']) { console.error('engine:verify not defined -> FAIL CLOSED'); process.exit(1) }"
           npm run engine:verify
+
+  plugin-gauntlet:
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'pull_request' &&
+      (
+        contains(github.event.pull_request.labels.*.name, 'gauntlet') ||
+        github.head_ref == 'feature/plugin-gauntlet-protocol'
+      )
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Protocol artifact check
+        run: |
+          test -s plugin-gauntlet/README.md || (echo "README.md missing or empty -> FAIL CLOSED" && exit 1)
+          test -s plugin-gauntlet/SCORECARD.md || (echo "SCORECARD.md missing or empty -> FAIL CLOSED" && exit 1)
+
+      - name: Scorecard schema check
+        run: |
+          grep -Fqx '| Plugin | Version | Class | Beat 01 Role | Beat 02 Role | Punch | Warmth | Width | Movement | CPU Damage | Verdict | Evidence |' plugin-gauntlet/SCORECARD.md || (echo "Scorecard header mismatch -> FAIL CLOSED" && exit 1)
+          grep -Fqx '|---|---|---|---|---|---:|---:|---:|---:|---:|---|---|' plugin-gauntlet/SCORECARD.md || (echo "Scorecard separator mismatch -> FAIL CLOSED" && exit 1)
